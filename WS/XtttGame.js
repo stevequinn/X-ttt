@@ -111,9 +111,10 @@ function onClientDisconnect() {
 		util.log("Player has disconnected: "+this.id);
 		
 		// Alert the other player that his opponent has disconnected by sending them a message.
-		const goodbyeMsg = msg(this.player.name + " has disconnected.", "System", "system");
-		io.to(this.player.opp.sockid).emit("opp_msg", goodbyeMsg);
-
+		if (this.player.opp) {
+		  const goodbyeMsg = msg(this.player.name + " has disconnected.", "System", "system");
+			io.to(this.player.opp.sockid).emit("opp_msg", goodbyeMsg);
+		}
 //		updAdmin("player disconnected - uid:"+removePlayer.uid + "  --  "+removePlayer.name);
 	}
 

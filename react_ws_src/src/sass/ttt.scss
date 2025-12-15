@@ -111,8 +111,8 @@ section#TTT_game{
 	#game_stat {
 		background: #eee;
 		margin: 10px;
-		width: 300px;
-		height: 90px;
+		width: 390px;
+		min-height: 90px;
 		vertical-align: middle;
 		text-align: center;
 		padding-top: 10px;
@@ -148,6 +148,10 @@ section#TTT_game{
 			}
 
 			&.win {
+				background: #32CD36;
+			}
+			
+			&.lose {
 				background: #f00;
 			}
 		}
@@ -162,5 +166,102 @@ section#TTT_game{
 			border-bottom: 7px solid #000;
 		}
 	}
-
+	
+    $chat-height: 400px;
+    $chat-width: 390px; 
+    $bg-color: $grey;
+    $bubble-bg: #e6e6e6;
+    $bubble-text: #333;
+    $date-color: #8696a0;
+    
+    #chat {
+        margin: 10px;
+        margin-top: 35px;
+        width: $chat-width;
+        height: $chat-height;
+        background-color: #fff;
+        border: 1px solid #ddd;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column; 
+        animation: fadeIn 3s ease;
+        
+        form {
+            padding: 0 20px;
+            display: flex;
+            flex-direction: row;
+            gap: 10px;
+            
+            .msg {
+                width: 100%;
+            }
+        }
+        .message_list {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background-color: $bg-color;
+            display: flex;
+            flex-direction: column;
+            gap: 15px; 
+        
+            &::-webkit-scrollbar {
+                width: 6px;
+            }
+            &::-webkit-scrollbar-thumb {
+                background-color: rgba(0,0,0,0.2);
+                border-radius: 3px;
+            }
+        }
+        
+        .message {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start; 
+            animation: fadeIn 0.3s ease;
+        
+            .msg {
+                background-color: $bubble-bg;
+                color: $bubble-text;
+                padding: 10px 15px;
+                border-radius: 18px;
+                border-bottom-left-radius: 2px; // Message tail
+                max-width: 75%;
+                width: fit-content;
+                line-height: 1.4;
+                font-size: 14px;
+                box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            }
+        
+            .date {
+                font-size: 11px;
+                color: $date-color;
+                margin-top: 4px;
+                margin-left: 2px;
+            }
+            
+            &.right {
+                align-items: flex-end; 
+            
+                .msg {
+                    background-color: $colorSecondary; 
+                    color: #fff; 
+                    border-bottom-left-radius: 18px;
+                    border-bottom-right-radius: 2px; // Message tail on other side 
+                }
+                
+                .date {
+                    text-align: right;
+                    margin-right: 2px;
+                }
+            }
+        }
+    }
+    
+    // Simple fade animation keyframe
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+	
 }
