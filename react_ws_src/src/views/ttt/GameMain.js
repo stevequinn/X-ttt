@@ -44,10 +44,10 @@ export default class SetName extends Component {
 				game_play: false,
 				game_stat: 'Connecting',
 				messages: [{
-                  text: 'Waiting for opponent...',
-                  date: null,
-                  from: 'System',
-                  from_uuid: 'system',
+									text: 'Waiting for opponent...',
+									date: null,
+									from: 'System',
+									from_uuid: 'system',
 				}]
 			}
 		}
@@ -56,8 +56,8 @@ export default class SetName extends Component {
 //	------------------------	------------------------	------------------------
 
 	componentDidMount () {
-    	TweenMax.from('#game_stat', 1, {display: 'none', opacity: 0, scaleX:0, scaleY:0, ease: Power4.easeIn})
-    	TweenMax.from('#game_board', 1, {display: 'none', opacity: 0, x:-200, y:-200, scaleX:0, scaleY:0, ease: Power4.easeIn})
+			TweenMax.from('#game_stat', 1, {display: 'none', opacity: 0, scaleX:0, scaleY:0, ease: Power4.easeIn})
+			TweenMax.from('#game_board', 1, {display: 'none', opacity: 0, x:-200, y:-200, scaleX:0, scaleY:0, ease: Power4.easeIn})
 	}
 
 //	------------------------	------------------------	------------------------
@@ -107,7 +107,7 @@ export default class SetName extends Component {
 		const { cell_vals } = this.state
 
 		return (<div>
-		        	{cell_vals && cell_vals[c]=='x' && <i className="fa fa-times fa-5x"></i>}
+					{cell_vals && cell_vals[c]=='x' && <i className="fa fa-times fa-5x"></i>}
 					{cell_vals && cell_vals[c]=='o' && <i className="fa fa-circle-o fa-5x"></i>}
 				</div>)
 	}
@@ -306,7 +306,7 @@ export default class SetName extends Component {
 		// win && console.log('win set: ', set)
 
 		if (win) {
-      const is_ply_win = cell_vals[set[0]] == 'x';
+			const is_ply_win = cell_vals[set[0]] == 'x';
 			this.refs[set[0]].classList.add(is_ply_win ? 'win': 'lose')
 			this.refs[set[1]].classList.add(is_ply_win ? 'win': 'lose')
 			this.refs[set[2]].classList.add(is_ply_win ? 'win': 'lose')
@@ -352,10 +352,10 @@ export default class SetName extends Component {
 	// @param msg {string}
 	// @returns {void}
 	send_msg  (msg) {
-	  // TODO: Adding a message send loading state and ui change in the future would be nice.
-    // The WS server knows about the opponent from the pairing step
-    // so just send the message string. 
-    this.socket.emit('ply_msg', { msg });
+		// TODO: Adding a message send loading state and ui change in the future would be nice.
+		// The WS server knows about the opponent from the pairing step
+		// so just send the message string. 
+		this.socket.emit('ply_msg', { msg });
 	}
 
 	// Receive a message from the opponent or from successful self send.
@@ -363,7 +363,7 @@ export default class SetName extends Component {
 	// @returns {void}
 	receive_msg(data) {
 		this.setState(function (prev) {
-      return { messages: [...prev.messages, data] }
-    });	
+			return { messages: [...prev.messages, data] }
+		});	
 	}
 }
