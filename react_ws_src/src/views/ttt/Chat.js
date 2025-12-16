@@ -2,8 +2,11 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import msgStore from '../../store';
 
 class MessageRow extends React.PureComponent {
+  // Using a PureComponent here to prevent unnecessary re-renders
+  
   formattedDate(dateStr) {
     if (!dateStr) return '';
 
@@ -28,9 +31,32 @@ MessageRow.propTypes = {
   msg: PropTypes.object.isRequired,
 };
 
-export default class Chat extends React.PureComponent {
-  // Using a PureComponent here to prevent unnecessary re-renders
-
+export default class Chat extends React.Component {
+  
+  constructor(props) {
+    super(props);
+    this.state = {
+      messages: msgStore.getChatMessages()
+    };
+  }
+  
+  componentDidMount() {
+    // Subscribe to the central message store and update message list state on changes. 
+    this.unsubscribe = msgStore.subscribe(function () {
+      this.setState({
+        messages: msgStore.getChatMessages()
+      });
+    }.bind(this));
+  }
+  
+  componentWillUnmount() {
+    if (this.unsubscribe) {
+      // Clear the message store on unmount.
+      msgStore.reset();
+      this.unsubscribe();
+    }
+  }
+  
   componentDidUpdate() {
     // Scroll to the bottom when new messages are added
     const messageList = this.refs.message_list;
@@ -40,7 +66,7 @@ export default class Chat extends React.PureComponent {
   }
 
   render() {
-    const { messages } = this.props;
+    const { messages } = this.state;
 
     return (
       <div id='chat'>
@@ -89,5 +115,4 @@ export default class Chat extends React.PureComponent {
 
 Chat.propTypes = {
   onSendMsg: PropTypes.func.isRequired,
-  messages: PropTypes.array.isRequired,
 };

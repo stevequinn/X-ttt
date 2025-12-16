@@ -89,7 +89,9 @@ function onTurn(data) {
 function onMsg(data) {
   const msgData = msg(data.msg, this.player.name, this.player.uid);
   // Send message to opponent but also self to confirm sending
-  io.to(this.player.opp.sockid).emit("opp_msg", { ...msgData, is_mine: false });
+  if (this.player.opp){
+    io.to(this.player.opp.sockid).emit("opp_msg", { ...msgData, is_mine: false });
+  }
   io.to(this.player.sockid).emit("opp_msg", { ...msgData, is_mine: true });
   util.log("msg --  usr:" + this.player.mode + " - :" + this.player.name + "  --  msg:" + msgData.text);
 }

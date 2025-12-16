@@ -4,6 +4,7 @@ import io from 'socket.io-client'
 
 import TweenMax from 'gsap'
 
+import msgStore from '../../store'
 import Chat from './Chat'
 
 import rand_arr_elem from '../../helpers/rand_arr_elem'
@@ -43,12 +44,6 @@ export default class SetName extends Component {
 				next_turn_ply: true,
 				game_play: false,
 				game_stat: 'Connecting',
-				messages: [{
-									text: 'Waiting for opponent...',
-									date: null,
-									from: 'System',
-									from_uuid: 'system',
-				}]
 			}
 		}
 	}
@@ -152,7 +147,7 @@ export default class SetName extends Component {
 
 				<button type='submit' onClick={this.end_game.bind(this)} className='button'><span>End Game <span className='fa fa-caret-right'></span></span></button>
 				
-				{this.props.game_type === 'live' && <Chat onSendMsg={this.send_msg.bind(this)} messages={this.state.messages} />}
+				{this.props.game_type === 'live' && <Chat onSendMsg={this.send_msg.bind(this)} />}
 			</div>
 		)
 	}
@@ -359,11 +354,9 @@ export default class SetName extends Component {
 	}
 
 	// Receive a message from the opponent or from successful self send.
-	// @param data {{msg: string, date: number, from: string, from_uuid: string, is_mind: bool}}
+	// @param data {{msg: string, date: number, from: string, from_uuid: string, is_mine: bool}}
 	// @returns {void}
 	receive_msg(data) {
-		this.setState(function (prev) {
-			return { messages: [...prev.messages, data] }
-		});	
+	  msgStore.addChatMessage(data); 
 	}
 }
