@@ -4,6 +4,9 @@ import io from 'socket.io-client'
 
 import TweenMax from 'gsap'
 
+import msgStore from '../../store'
+import Chat from './Chat'
+
 import rand_arr_elem from '../../helpers/rand_arr_elem'
 import rand_to_fro from '../../helpers/rand_to_fro'
 
@@ -40,7 +43,7 @@ export default class SetName extends Component {
 				cell_vals: {},
 				next_turn_ply: true,
 				game_play: false,
-				game_stat: 'Connecting'
+				game_stat: 'Connecting',
 			}
 		}
 	}
@@ -48,8 +51,8 @@ export default class SetName extends Component {
 //	------------------------	------------------------	------------------------
 
 	componentDidMount () {
-    	TweenMax.from('#game_stat', 1, {display: 'none', opacity: 0, scaleX:0, scaleY:0, ease: Power4.easeIn})
-    	TweenMax.from('#game_board', 1, {display: 'none', opacity: 0, x:-200, y:-200, scaleX:0, scaleY:0, ease: Power4.easeIn})
+			TweenMax.from('#game_stat', 1, {display: 'none', opacity: 0, scaleX:0, scaleY:0, ease: Power4.easeIn})
+			TweenMax.from('#game_board', 1, {display: 'none', opacity: 0, x:-200, y:-200, scaleX:0, scaleY:0, ease: Power4.easeIn})
 	}
 
 //	------------------------	------------------------	------------------------
@@ -79,6 +82,7 @@ export default class SetName extends Component {
 
 
 		this.socket.on('opp_turn', this.turn_opp_live.bind(this));
+		this.socket.on('opp_msg', this.receive_msg.bind(this));
 
 
 
@@ -98,7 +102,7 @@ export default class SetName extends Component {
 		const { cell_vals } = this.state
 
 		return (<div>
-		        	{cell_vals && cell_vals[c]=='x' && <i className="fa fa-times fa-5x"></i>}
+					{cell_vals && cell_vals[c]=='x' && <i className="fa fa-times fa-5x"></i>}
 					{cell_vals && cell_vals[c]=='o' && <i className="fa fa-circle-o fa-5x"></i>}
 				</div>)
 	}
@@ -142,7 +146,8 @@ export default class SetName extends Component {
 				</div>
 
 				<button type='submit' onClick={this.end_game.bind(this)} className='button'><span>End Game <span className='fa fa-caret-right'></span></span></button>
-
+				
+				{this.props.game_type === 'live' && <Chat onSendMsg={this.send_msg.bind(this)} />}
 			</div>
 		)
 	}
@@ -296,16 +301,16 @@ export default class SetName extends Component {
 		// win && console.log('win set: ', set)
 
 		if (win) {
-		
-			this.refs[set[0]].classList.add('win')
-			this.refs[set[1]].classList.add('win')
-			this.refs[set[2]].classList.add('win')
+			const is_ply_win = cell_vals[set[0]] == 'x';
+			this.refs[set[0]].classList.add(is_ply_win ? 'win': 'lose')
+			this.refs[set[1]].classList.add(is_ply_win ? 'win': 'lose')
+			this.refs[set[2]].classList.add(is_ply_win ? 'win': 'lose')
 
 			TweenMax.killAll(true)
 			TweenMax.from('td.win', 1, {opacity: 0, ease: Linear.easeIn})
 
 			this.setState({
-				game_stat: (cell_vals[set[0]]=='x'?'You':'Opponent')+' win',
+				game_stat: (is_ply_win?'You':'Opponent')+' win',
 				game_play: false
 			})
 
@@ -337,7 +342,21 @@ export default class SetName extends Component {
 
 		this.props.onEndGame()
 	}
+	
+	// Send a message to the opponent
+	// @param msg {string}
+	// @returns {void}
+	send_msg  (msg) {
+		// TODO: Adding a message send loading state and ui change in the future would be nice.
+		// The WS server knows about the opponent from the pairing step
+		// so just send the message string. 
+		this.socket.emit('ply_msg', { msg });
+	}
 
-
-
+	// Receive a message from the opponent or from successful self send.
+	// @param data {{msg: string, date: number, from: string, from_uuid: string, is_mine: bool}}
+	// @returns {void}
+	receive_msg(data) {
+	  msgStore.addChatMessage(data); 
+	}
 }

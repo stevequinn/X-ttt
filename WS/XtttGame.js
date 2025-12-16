@@ -1,7 +1,21 @@
+const crypto = require("crypto");
 
+// ----	--------------------------------------------	--------------------------------------------
+// ----	--------------------------------------------	--------------------------------------------
 
-// ----	--------------------------------------------	--------------------------------------------	
-// ----	--------------------------------------------	--------------------------------------------	
+// Construct a message object
+// @param text:string - message text
+// @param from:string - sender name
+// @param from_uuid:string - sender uuid
+// @returns {{text:string, date:number, from:string, from_uuid:string}}
+function msg(text, from, from_uuid) {
+  return {
+    date: Date.now(),
+    text: text,
+    from: from,
+    from_uuid: from_uuid
+  };
+}
 
 // New player has joined
 function onNewPlayer(data) {
@@ -9,7 +23,7 @@ function onNewPlayer(data) {
 	util.log("New player has joined: "+data.name);
 
 	// Create a new player
-	var newPlayer = new Player(-1, data.name, "looking");
+	var newPlayer = new Player(crypto.randomUUID(), data.name, "looking");
 	newPlayer.sockid = this.id;
 
 	this.player = newPlayer;
@@ -56,6 +70,9 @@ function pair_avail_players() {
 	util.log("connect_new_players - uidM:"+p1.uid + " ("+p1.name + ")  ++  uidS: "+p2.uid + " ("+p2.name+")");
 	// updAdmin("connect_new_players - uidM:"+p1.uid + " ("+p1.name + ")  ++  uidS: "+p2.uid + " ("+p2.name+")");
 
+	// Welcome messages
+	io.to(p1.sockid).emit("opp_msg", { ...msg(p2.name + " entered the chat", "System", "system"), is_mine: false });
+	io.to(p2.sockid).emit("opp_msg", { ...msg(p1.name + " entered the chat", "System", "system"), is_mine: false });
 };
 
 // ----	--------------------------------------------	--------------------------------------------	
@@ -69,8 +86,15 @@ function onTurn(data) {
 	// updAdmin("Q answer - game - qgid:"+data.qgid + "  --  usr:"+this.player.mode + " - uid:"+this.player.uid + "  --  qnum:"+data.qnum + "  --  ans:"+data.ansnum);
 };
 
-// ----	--------------------------------------------	--------------------------------------------	
-// ----	--------------------------------------------	--------------------------------------------	
+function onMsg(data) {
+  const msgData = msg(data.msg, this.player.name, this.player.uid);
+  // Send message to opponent but also self to confirm sending
+  if (this.player.opp){
+    io.to(this.player.opp.sockid).emit("opp_msg", { ...msgData, is_mine: false });
+  }
+  io.to(this.player.sockid).emit("opp_msg", { ...msgData, is_mine: true });
+  util.log("msg --  usr:" + this.player.mode + " - :" + this.player.name + "  --  msg:" + msgData.text);
+}
 
 // Socket client has disconnected
 function onClientDisconnect() {
@@ -87,6 +111,12 @@ function onClientDisconnect() {
 //		updAdmin("Admin has disconnected - uid:"+this.uid + "  --  "+this.name);
 	} else {
 		util.log("Player has disconnected: "+this.id);
+		
+		// Alert the other player that his opponent has disconnected by sending them a message.
+		if (this.player.opp) {
+		  const goodbyeMsg = msg(this.player.name + " has disconnected.", "System", "system");
+			io.to(this.player.opp.sockid).emit("opp_msg", goodbyeMsg);
+		}
 //		updAdmin("player disconnected - uid:"+removePlayer.uid + "  --  "+removePlayer.name);
 	}
 
@@ -105,6 +135,8 @@ set_game_sock_handlers = function (socket) {
 	socket.on("new player", onNewPlayer);
 
 	socket.on("ply_turn", onTurn);
+	
+	socket.on("ply_msg", onMsg);
 
 	socket.on("disconnect", onClientDisconnect);
 

@@ -12,7 +12,8 @@ export default class Ttt extends Component {
 		super(props)
 
 		this.state = {
-			game_step: this.set_game_step()
+			game_step: this.set_game_step(),
+			game_type: null
 		}
 	}
 
